@@ -39,10 +39,20 @@ for (let r = 0; r < rows; r++) {
 
 createFood(rows, cols);
 
-function gameLoop() {
-    clearSnake(blocks, snake);
+let intervalId = setInterval(gameLoop, 300); // store interval
 
-    let head = moveSnake();
+function gameLoop() {
+    let head = moveSnake();  // ✅ move first
+
+    // 🔴 FIRST check collision
+    if (checkCollision(head, rows, cols)) {
+        clearInterval(intervalId);   // ✅ stop loop
+        alert("Game Over");
+        return;
+    }
+
+    // ✅ NOW safe to touch UI
+    clearSnake(blocks, snake);
 
     if (head.x === food.x && head.y === food.y) {
         clearFood(blocks, food);
@@ -53,17 +63,13 @@ function gameLoop() {
         updateScore(scoreElement, score);
     }
 
-    if (checkCollision(head, rows, cols)) {
-        alert("Game Over");
-        return;
-    }
-
     drawFood(blocks, food);
     drawSnake(blocks, snake);
 }
 
-setInterval(gameLoop, 300);
-
 setupControls((dir) => {
     direction = dir;
 });
+
+import { setDirection } from "./game.js";
+setupControls(setDirection);

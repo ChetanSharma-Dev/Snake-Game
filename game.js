@@ -40,3 +40,7 @@ export function checkCollision(head, rows, cols) {
         head.y >= cols
     );
 }
+
+export function setDirection(newDir) {
+    direction = newDir;
+}
