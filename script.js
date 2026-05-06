@@ -1,3 +1,5 @@
+window.onload = () => {
+
 const board = document.querySelector(".board"); 
 let StartButton = document.querySelector(".btn-start");
 let Modal = document.querySelector(".modal");
@@ -24,11 +26,7 @@ const cols = Math.floor(board.clientWidth / blockWidth);
 const rows = Math.floor(board.clientHeight / blockHeight);
 
 let blocks = [];
-let snake = [{
-    x : 1, y : 3,
-}, {
-  x : 1, y : 4,  
-}];
+let snake = [{x : 1, y : 3}, {x : 1, y : 4}, {x : 1, y : 5}];
 
 let direction = "down";
 
@@ -70,12 +68,31 @@ function render(){
         blocks[`${segment.x}-${segment.y}`].classList.remove("fill");
     });
 
+    if(snake.slice(0, -1).some(segment => segment.x === head.x && segment.y === head.y)) {
+    Modal.style.display = "flex";
+    StartGame.style.display = "none";
+    GameOver.style.display = "flex";
+
+    clearInterval(intervalId);
+    clearInterval(TimeIntervalId);
+
+    return;
+    }
+
+    if(head.x<0 || head.x>=rows || head.y<0 || head.y>=cols){
+        Modal.style.display = "flex";
+        StartGame.style.display = "none";
+        GameOver.style.display = "flex";
+
+        clearInterval(intervalId);
+        clearInterval(TimeIntervalId);
+        
+        return;
+    }
+
     if(head.x == food.x && head.y == food.y){
         blocks[`${food.x}-${food.y}`].classList.remove("food");
         food = { x:Math.floor(Math.random()*rows) , y:Math.floor(Math.random()*cols)};
-        blocks[`${food.x}-${food.y}`].classList.add("food");
-
-        snake.push(head);
 
         Score += 10;
         ScoreElement.innerText = Score;
@@ -85,19 +102,14 @@ function render(){
             localStorage.setItem("HighScore", HighScore.toString());
         }
         
+        snake.unshift(head);
     }
 
-    if(head.x<0 || head.x>=rows || head.y<0 || head.y>=cols){
-        Modal.style.display = "flex";
-        StartGame.style.display = "none";
-        GameOver.style.display = "flex";
-    
-        clearInterval(intervalId)
-        return;
+    else{
+        snake.unshift(head);
+        snake.pop();
     }
 
-    snake.unshift(head);
-    snake.pop();
 
     snake.forEach(segment => {
         blocks[`${segment.x}-${segment.y}`].classList.add("fill")
@@ -106,9 +118,10 @@ function render(){
 
 StartButton.addEventListener("click", () =>{
     Modal.style.display = "none";
+    render();
     intervalId = setInterval(()=> {
     render();
-    }, 301);
+    }, 300);
     TimeIntervalId = setInterval(() => {
         let [min, sec] = Time.split(":").map(Number);
         if(sec == 59){
@@ -129,7 +142,12 @@ StartButton.addEventListener("click", () =>{
 RestartGameButton.addEventListener("click", RestartGame);
 
 function RestartGame(){
+
+    clearInterval(intervalId);       // stop game loop
+    clearInterval(TimeIntervalId);   // ✅ stop time loop
+
     blocks[`${food.x}-${food.y}`].classList.remove("food");
+
     snake.forEach(segment => {
         blocks[`${segment.x}-${segment.y}`].classList.remove("fill");
     });
@@ -137,13 +155,36 @@ function RestartGame(){
     
     Score = 0;
     Time = "00:00";
+
+    TimeElement.innerText = Time;
+
     
     Modal.style.display = "none"; 
-    direction = "right";
+    StartGame.style.display = "flex";  // ✅ reset start screen
+    GameOver.style.display = "none";   // ✅ hide game over
+    direction = "down";
     
-    snake = [{x : 1, y : 3,}, {x : 1, y : 4,}];
+    snake = [{x : 1, y : 3,}, {x : 1, y : 4,}, {x : 1, y : 5,}];
     food = { x:Math.floor(Math.random()*rows) , y:Math.floor(Math.random()*cols)};
-    intervalId = setInterval(()=> {render()}, 301);
+    
+    render();
+
+    intervalId = setInterval(()=> {render()}, 300);
+
+    TimeIntervalId = setInterval(() => {
+        let [min, sec] = Time.split(":").map(Number);
+
+        if(sec == 59){
+            min +=1;
+            sec = 0;
+        } else {
+            sec +=1;
+        }
+
+        Time = `${String(min).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
+        TimeElement.innerText = Time;
+
+    }, 1000);
     
     ScoreElement.innerText = Score;
     HighScoreElement.innerText = HighScore;
@@ -164,3 +205,15 @@ addEventListener("keydown", (event) => {
         direction = "right";
     }
 })
+
+let resizeTimer;
+
+window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+
+    resizeTimer = setTimeout(() => {
+        location.reload();
+    }, 300);
+});
+
+}
