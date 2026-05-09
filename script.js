@@ -26,14 +26,36 @@ const cols = Math.floor(board.clientWidth / blockWidth);
 const rows = Math.floor(board.clientHeight / blockHeight);
 
 let blocks = [];
-let snake = [{x : 1, y : 3}, {x : 1, y : 4}, {x : 1, y : 5}];
+let snake = [{x : 1, y : 5}, {x : 1, y : 4}, {x : 1, y : 3}];
 
-let direction = "down";
+let direction = "right";
 
 let intervalId = null;
 let TimeIntervalId = null;
 
-let  food = { x:Math.floor(Math.random()*rows) , y:Math.floor(Math.random()*cols)};
+function generateFood(){
+
+    let newFood;
+
+    do{
+
+        newFood = {
+            x: Math.floor(Math.random() * rows),
+            y: Math.floor(Math.random() * cols)
+        };
+
+    }
+    while(
+        snake.some(segment => 
+            segment.x === newFood.x &&
+            segment.y === newFood.y
+        )
+    );
+
+    return newFood;
+}
+
+food = generateFood();
 
 
 for (let row = 0; row< rows; row++){
@@ -45,6 +67,7 @@ for (let row = 0; row< rows; row++){
         blocks[`${row}-${col}`] = block;
     }
 }
+
 
 function render(){
     let head = null;
@@ -92,7 +115,7 @@ function render(){
 
     if(head.x == food.x && head.y == food.y){
         blocks[`${food.x}-${food.y}`].classList.remove("food");
-        food = { x:Math.floor(Math.random()*rows) , y:Math.floor(Math.random()*cols)};
+        food = generateFood();
 
         Score += 10;
         ScoreElement.innerText = Score;
@@ -162,10 +185,10 @@ function RestartGame(){
     Modal.style.display = "none"; 
     StartGame.style.display = "flex";  // ✅ reset start screen
     GameOver.style.display = "none";   // ✅ hide game over
-    direction = "down";
+    direction = "right";
     
-    snake = [{x : 1, y : 3,}, {x : 1, y : 4,}, {x : 1, y : 5,}];
-    food = { x:Math.floor(Math.random()*rows) , y:Math.floor(Math.random()*cols)};
+    snake = [{x : 1, y : 5}, {x : 1, y : 4}, {x : 1, y : 3}];
+    food = generateFood();
     
     render();
 
