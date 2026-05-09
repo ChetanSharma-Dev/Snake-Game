@@ -55,8 +55,6 @@ function generateFood(){
     return newFood;
 }
 
-food = generateFood();
-
 
 for (let row = 0; row< rows; row++){
     for (let col = 0; col< cols; col++){
@@ -69,10 +67,10 @@ for (let row = 0; row< rows; row++){
 }
 
 
+food = generateFood();
+
 function render(){
     let head = null;
-
-    blocks[`${food.x}-${food.y}`].classList.add("food");
 
     if(direction === "left"){
         head = {x:snake[0].x, y:snake[0].y-1}
@@ -96,6 +94,8 @@ function render(){
     StartGame.style.display = "none";
     GameOver.style.display = "flex";
 
+    blocks[`${food.x}-${food.y}`].classList.remove("food");
+
     clearInterval(intervalId);
     clearInterval(TimeIntervalId);
 
@@ -107,6 +107,8 @@ function render(){
         StartGame.style.display = "none";
         GameOver.style.display = "flex";
 
+        blocks[`${food.x}-${food.y}`].classList.remove("food");
+
         clearInterval(intervalId);
         clearInterval(TimeIntervalId);
         
@@ -116,7 +118,7 @@ function render(){
     if(head.x == food.x && head.y == food.y){
         blocks[`${food.x}-${food.y}`].classList.remove("food");
         food = generateFood();
-
+        blocks[`${food.x}-${food.y}`].classList.add("food");
         Score += 10;
         ScoreElement.innerText = Score;
 
@@ -142,6 +144,7 @@ function render(){
 StartButton.addEventListener("click", () =>{
     Modal.style.display = "none";
     render();
+    blocks[`${food.x}-${food.y}`].classList.add("food");
     intervalId = setInterval(()=> {
     render();
     }, 300);
@@ -189,7 +192,8 @@ function RestartGame(){
     
     snake = [{x : 1, y : 5}, {x : 1, y : 4}, {x : 1, y : 3}];
     food = generateFood();
-    
+
+    blocks[`${food.x}-${food.y}`].classList.add("food");
     render();
 
     intervalId = setInterval(()=> {render()}, 300);
